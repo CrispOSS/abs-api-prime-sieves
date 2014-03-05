@@ -1,3 +1,5 @@
+target/*
+bin/*
 *.class
 
 # Package Files #
