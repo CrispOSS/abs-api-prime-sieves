@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.Arrays;
 
 import abs.api.Actor;
 import abs.api.Context;
@@ -32,6 +33,7 @@ public class Generator extends Sieve {
 		this.target = target;
 		int modulo = target % par;
 		int size = target / par;
+		//System.out.println(par + " limit " + size);
 		for (int i = 1; i < par; ++i) {
 			if (i < modulo) {
 				Sieve s = new Sieve(3, size + 1, i, modulo);
@@ -48,13 +50,35 @@ public class Generator extends Sieve {
 
 	}
 
-	public void run() {
+	public void run_par() {
+		//System.out.println(actors.size());
+		//System.out.println(sieves.size());
 		Set<Future<?>> futures = new HashSet<>();
-		for (int i = 0; i < currentList.size(); ++i) {
+		for (Actor s : actors) {
+					//s.init(true);
+                                        Future<Object> r = invoke(s, "init", new Boolean(true));
+                                        futures.add(r);
+                                }
+		this.init(true);
+//		System.out.println(futures);
+//		System.out.println(actors);
+
+		futures.forEach(f -> {
+                        try {
+                                f.get();
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                        }
+                });
+		futures.clear();
+//		System.out.println("All arrays initialized");
+		for (int i = 0; i < currentList.length; ++i) {
+			
 			int prime = i * 2 + offset;
+			//System.out.print(prime+ " ");
 			if (prime * prime > target * 2)
 				break;
-			if (currentList.get(i)) {
+			if (currentList[i]) {
 				for (Actor s : actors) {
 					Future<Object> r = invoke(s, "sieve", new Integer(prime));
 					futures.add(r);
@@ -72,35 +96,37 @@ public class Generator extends Sieve {
 	}
 
 	@Override
-	public List<Integer> collect() {
-		List<Integer> result = new ArrayList<>();
+	public Integer collect() {
+//		System.out.println(Arrays.asList(currentList));
+		int sum =Collections.frequency(Arrays.asList(currentList), true);
 		for (Sieve s : sieves) {
-			result.addAll(s.collect());
+			 sum+= s.collect();
 		}
-		Collections.sort(result);
-		return result;
+		
+		return sum;
 	}
 
 	public static void main(String[] args) {
-		Integer n = 10000;
+		Integer n = 10000,p=1;
 		Boolean print = false;
 		if (args.length != 0) {
 			n = Integer.parseInt(args[0]);
-			if (args.length > 1) {
-				print = Boolean.parseBoolean(args[1]);
-			}
+			// (args.length > 1) {
+			//rint = Boolean.parseBoolean(args[1]);
+			p = Integer.parseInt(args[1]);
+			//}
 		}
-		Generator prime = new Generator(n, Runtime.getRuntime()
-				.availableProcessors() / 2);
-		final long start = System.currentTimeMillis();
-		prime.run();
-		final long end = System.currentTimeMillis();
-		List<Integer> result = prime.collect();
+		//stem.out.println(n+" "+p);
+		Generator prime = new Generator(n/2, p);
+		//nal long start = System.currentTimeMillis();
+		prime.run_par();
+		
+		//nal long end = System.currentTimeMillis();
+		/*List<Integer> result = prime.collect();
 		if (print) {
 			System.out.println(result);
-		}
-		long duration = end - start;
-		System.out.println("Computation of " + result.size() + " primes took: "
-				+ Duration.ofMillis(duration));
+		}*/
+		//ng duration = end - start;
+		//System.out.println("Computation of" + (prime.collect()+1) +" primes ");
 	}
 }

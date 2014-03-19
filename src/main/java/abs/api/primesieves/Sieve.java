@@ -4,9 +4,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Collections;
 import abs.api.Actor;
 import abs.api.Reference;
+import java.util.Arrays;
 
 /**
  * @author Vlad Nicolae Serbanescu
@@ -16,8 +17,8 @@ public class Sieve implements Actor {
 
 	private static final long serialVersionUID = 1L;
 
-	protected ArrayList<Boolean> currentList;
-	protected int offset = 0, last;
+	protected boolean[] currentList;
+	protected int offset = 0, last, size=0;
 
 	@Override
 	public URI name() {
@@ -44,21 +45,24 @@ public class Sieve implements Actor {
 					+ (modulo * (size + 1) * 2);
 		}
 		last = offset + size * 2 - 2;
-		currentList = new ArrayList<Boolean>(size);
-		for (int i = 0; i < size; i++) {
-			currentList.add(true);
-		}
-		// System.out.println(name());
-		// System.out.print(size + " " + modulo + ": ");
+		this.size=size;
+		 //System.out.print(name() + "----");
+		 System.out.println(size + " " + modulo + ": "+ offset + " "+ last +" ");
 		// for (int i = 0; i < currentList.size(); i++) {
 		// System.out.print(i * 2 + offset + " ");
 		// }
 		// System.out.println();
 
 	}
+	public boolean init(Boolean b){
+		currentList = new boolean[size];
+                for (int i = 0; i < size; i++) {
+                        currentList[i]=true;
+                }
+		return true;
+	}
 
-	public boolean sieve(Integer the_prime) {
-		int n = the_prime;
+	public boolean sieve(Integer n) {
 		int first = n * n;
 		int j = 0;
 		if (offset <= first) {
@@ -75,28 +79,21 @@ public class Sieve implements Actor {
 				}
 			}
 		}
-
-		while (j <= last) {
-			currentList.set((j - offset) / 2, false);
-			j += (2 * n);
+		for(;j<=last;j+=2*n){
+			currentList[(j - offset) / 2] = false;
 		}
-
 		return true;
 	}
 
-	public List<Integer> collect() {
-		List<Integer> primes = new ArrayList<>();
-		for (int i = 0; i < currentList.size(); ++i) {
-			if (currentList.get(i)) {
-				primes.add(i * 2 + offset);
-			}
-		}
-		return primes;
+	public Integer collect() {
+//		System.out.println(Arrays.asList(currentList));
+		Integer sum = Collections.frequency(Arrays.asList(currentList), true);
+		return sum;
 	}
 
 	public void show() {
-		for (int i = 0; i < currentList.size(); i++) {
-			if (currentList.get(i))
+		for (int i = 0; i < currentList.length; i++) {
+			if (currentList[i])
 				System.out.print(i * 2 + offset + " ");
 		}
 		System.out.println();
