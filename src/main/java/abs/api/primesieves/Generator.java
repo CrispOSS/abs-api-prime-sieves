@@ -55,7 +55,7 @@ public class Generator extends Sieve {
 		//System.out.println(sieves.size());
 		Set<Future<?>> futures = new HashSet<>();
 		for (Actor s : actors) {
-					//s.init(true);
+//					s.init(true);
                                         Future<Object> r = invoke(s, "init", new Boolean(true));
                                         futures.add(r);
                                 }
@@ -63,28 +63,28 @@ public class Generator extends Sieve {
 //		System.out.println(futures);
 //		System.out.println(actors);
 
-		futures.forEach(f -> {
+/*		futures.forEach(f -> {
                         try {
                                 f.get();
                         } catch (Exception e) {
                                 e.printStackTrace();
                         }
-                });
+                });*/
 		futures.clear();
 //		System.out.println("All arrays initialized");
-		for (int i = 0; i < currentList.length; ++i) {
+		int i=currentList.nextClearBit(0);
+		while (i<currentList.size()){
 			
 			int prime = i * 2 + offset;
 			//System.out.print(prime+ " ");
 			if (prime * prime > target * 2)
 				break;
-			if (currentList[i]) {
-				for (Actor s : actors) {
+			for (Actor s : actors) {
 					Future<Object> r = invoke(s, "sieve", new Integer(prime));
 					futures.add(r);
-				}
-				this.sieve(prime);
 			}
+			this.sieve(prime);
+			i=currentList.nextClearBit(i+1);
 		}
 		futures.forEach(f -> {
 			try {
@@ -98,7 +98,7 @@ public class Generator extends Sieve {
 	@Override
 	public Integer collect() {
 //		System.out.println(Arrays.asList(currentList));
-		int sum =Collections.frequency(Arrays.asList(currentList), true);
+		int sum =size-currentList.cardinality();
 		for (Sieve s : sieves) {
 			 sum+= s.collect();
 		}
@@ -127,6 +127,6 @@ public class Generator extends Sieve {
 			System.out.println(result);
 		}*/
 		//ng duration = end - start;
-		//System.out.println("Computation of" + (prime.collect()+1) +" primes ");
+		//stem.out.println("Computation of" + (prime.collect()+1) +" primes ");
 	}
 }

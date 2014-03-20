@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.BitSet;
 import java.util.Collections;
 import abs.api.Actor;
 import abs.api.Reference;
@@ -17,7 +18,7 @@ public class Sieve implements Actor {
 
 	private static final long serialVersionUID = 1L;
 
-	protected boolean[] currentList;
+	protected BitSet currentList;
 	protected int offset = 0, last, size=0;
 
 	@Override
@@ -47,7 +48,7 @@ public class Sieve implements Actor {
 		last = offset + size * 2 - 2;
 		this.size=size;
 		 //System.out.print(name() + "----");
-		 System.out.println(size + " " + modulo + ": "+ offset + " "+ last +" ");
+//		 System.out.println(size + " " + modulo + ": "+ offset + " "+ last +" ");
 		// for (int i = 0; i < currentList.size(); i++) {
 		// System.out.print(i * 2 + offset + " ");
 		// }
@@ -55,10 +56,11 @@ public class Sieve implements Actor {
 
 	}
 	public boolean init(Boolean b){
-		currentList = new boolean[size];
-                for (int i = 0; i < size; i++) {
+		currentList = new BitSet(size);
+                System.out.println(size + " : "+ offset + " "+ last +" "+ currentList.size());
+		/*for (int i = 0; i < size; i++) {
                         currentList[i]=true;
-                }
+                }*/
 		return true;
 	}
 
@@ -79,21 +81,26 @@ public class Sieve implements Actor {
 				}
 			}
 		}
+		if(j<=last){
 		for(;j<=last;j+=2*n){
-			currentList[(j - offset) / 2] = false;
-		}
+			
+			currentList.set((j - offset) / 2);	
+			//currentList[(j - offset) / 2] = false;
+			if(j<0||last-j< 2*n)
+				break;
+		}}
 		return true;
 	}
 
 	public Integer collect() {
 //		System.out.println(Arrays.asList(currentList));
-		Integer sum = Collections.frequency(Arrays.asList(currentList), true);
+		Integer sum = size- currentList.cardinality();
 		return sum;
 	}
 
 	public void show() {
-		for (int i = 0; i < currentList.length; i++) {
-			if (currentList[i])
+		for (int i = 0; i < currentList.size(); i++) {
+			if (!currentList.get(i))
 				System.out.print(i * 2 + offset + " ");
 		}
 		System.out.println();
