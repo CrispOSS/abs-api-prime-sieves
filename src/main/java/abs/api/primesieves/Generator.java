@@ -14,19 +14,39 @@ import abs.api.Actor;
 import abs.api.Context;
 import abs.api.SystemContext;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author Vlad Nicolae Serbanescu
+ * The Class Generator.
+ *
+ * @author Vlad-Nicolae Serbanescu
  * @author Behrooz Nobakht
  */
+
+
+
 public class Generator extends Sieve {
 
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 
+	/** The target. */
 	private int target = 0;
+	
+	/** The actors. Each actor is a processes whose methods are invoked asynchronously */
 	private final List<Actor> actors = new LinkedList<>();
+	
+	/** The sieves.Used for verifying correctness */
 	private final List<Sieve> sieves = new LinkedList<>();
+	
+	/** The context. Required by the actors to invoke methods. */
 	private final Context context = new SystemContext();
 
+	/**
+	 * Instantiates a new generator.
+	 *
+	 * @param target number up to which to calculate primes
+	 * @param par number of parallel processes
+	 */
 	public Generator(int target, int par) {
 		super(3, (target % par == 0) ? target / par : target / par + 1, 0,
 				target % par);
@@ -37,7 +57,7 @@ public class Generator extends Sieve {
 		for (int i = 1; i < par; ++i) {
 			if (i < modulo) {
 				Sieve s = new Sieve(3, size + 1, i, modulo);
-				Actor as = context.newReference(s.name().toString(), s);
+				Actor as = context.newReference(s.name().toString(), s); //this is required by invoke
 				actors.add(as);
 				sieves.add(s);
 			} else {
@@ -50,36 +70,39 @@ public class Generator extends Sieve {
 
 	}
 
+	/**
+	 * Run_par The method that runs the sieveing algorithm in parallel for each prime number.
+	 */
 	public void run_par() {
 		//System.out.println(actors.size());
 		//System.out.println(sieves.size());
 		Set<Future<?>> futures = new HashSet<>();
 		for (Actor s : actors) {
 //					s.init(true);
-                                        Future<Object> r = invoke(s, "init", new Boolean(true));
+										//this is where the magic happens for the initialization pahse
+                                        Future<Object> r = invoke(s, "init", new Boolean(true)); 
                                         futures.add(r);
                                 }
 		this.init(true);
 //		System.out.println(futures);
 //		System.out.println(actors);
 
-/*		futures.forEach(f -> {
+		futures.forEach(f -> {
                         try {
                                 f.get();
                         } catch (Exception e) {
                                 e.printStackTrace();
                         }
-                });*/
+                });
 		futures.clear();
-//		System.out.println("All arrays initialized");
 		int i=currentList.nextClearBit(0);
 		while (i<currentList.size()){
 			
 			int prime = i * 2 + offset;
-			//System.out.print(prime+ " ");
 			if (prime * prime > target * 2)
 				break;
 			for (Actor s : actors) {
+				//this is where the magic happens for the initialization pahse
 					Future<Object> r = invoke(s, "sieve", new Integer(prime));
 					futures.add(r);
 			}
@@ -95,6 +118,9 @@ public class Generator extends Sieve {
 		});
 	}
 
+	/* (non-Javadoc)
+	 * @see abs.api.primesieves.Sieve#collect()
+	 */
 	@Override
 	public Integer collect() {
 //		System.out.println(Arrays.asList(currentList));
@@ -106,6 +132,11 @@ public class Generator extends Sieve {
 		return sum;
 	}
 
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
 		Integer n = 10000,p=1;
 		Boolean print = false;

@@ -98,6 +98,9 @@ public class Sieve implements Actor {
 		return sum;
 	}
 
+	/**
+	 * Show.
+	 */
 	public void show() {
 		for (int i = 0; i < currentList.size(); i++) {
 			if (!currentList.get(i))
