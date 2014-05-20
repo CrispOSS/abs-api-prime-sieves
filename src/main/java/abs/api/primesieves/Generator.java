@@ -1,18 +1,15 @@
 package abs.api.primesieves;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.Arrays;
 
 import abs.api.Actor;
 import abs.api.Context;
-import abs.api.SystemContext;
+import abs.api.LocalContext;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -21,8 +18,6 @@ import abs.api.SystemContext;
  * @author Vlad-Nicolae Serbanescu
  * @author Behrooz Nobakht
  */
-
-
 
 public class Generator extends Sieve {
 
@@ -39,7 +34,7 @@ public class Generator extends Sieve {
 	private final List<Sieve> sieves = new LinkedList<>();
 	
 	/** The context. Required by the actors to invoke methods. */
-	private final Context context = new SystemContext();
+	private final Context context = new LocalContext();
 
 	/**
 	 * Instantiates a new generator.
@@ -57,12 +52,12 @@ public class Generator extends Sieve {
 		for (int i = 1; i < par; ++i) {
 			if (i < modulo) {
 				Sieve s = new Sieve(3, size + 1, i, modulo);
-				Actor as = context.newReference(s.name().toString(), s); //this is required by invoke
+				Actor as = context.newActor(s.name().toString(), s); //this is required by invoke
 				actors.add(as);
 				sieves.add(s);
 			} else {
 				Sieve s = new Sieve(3, size, i, modulo);
-				Actor as = context.newReference(s.name().toString(), s);
+				Actor as = context.newActor(s.name().toString(), s);
 				actors.add(as);
 				sieves.add(s);
 			}
@@ -76,25 +71,27 @@ public class Generator extends Sieve {
 	public void run_par() {
 		//System.out.println(actors.size());
 		//System.out.println(sieves.size());
-		Set<Future<?>> futures = new HashSet<>();
-		for (Actor s : actors) {
+		Set<Future<?>> initFutures = new HashSet<>();
+		for (final Actor s : actors) {
 //					s.init(true);
-										//this is where the magic happens for the initialization pahse
-                                        Future<Object> r = invoke(s, "init", new Boolean(true)); 
-                                        futures.add(r);
+			//this is where the magic happens for the initialization pahse
+			Runnable msg = () -> ((Sieve) context().notary().get(s)).init(new Boolean(true));
+			Future<?> r = send(s, msg);
+//            Future<?> r = invoke(s, "init", new Boolean(true)); 
+            initFutures.add(r);
                                 }
 		this.init(true);
 //		System.out.println(futures);
 //		System.out.println(actors);
 
-		futures.forEach(f -> {
+		initFutures.forEach(f -> {
                         try {
                                 f.get();
                         } catch (Exception e) {
                                 e.printStackTrace();
                         }
                 });
-		futures.clear();
+		Set<Future<?>> workFutures = new HashSet<>();
 		int i=currentList.nextClearBit(0);
 		while (i<currentList.size()){
 			
@@ -103,13 +100,15 @@ public class Generator extends Sieve {
 				break;
 			for (Actor s : actors) {
 				//this is where the magic happens for the initialization pahse
-					Future<Object> r = invoke(s, "sieve", new Integer(prime));
-					futures.add(r);
+					Runnable msg = () -> ((Sieve) context().notary().get(s)).sieve(new Integer(prime));
+//					Future<?> r = invoke(s, "sieve", new Integer(prime));
+					Future<?> r = send(s, msg);
+					workFutures.add(r);
 			}
 			this.sieve(prime);
 			i=currentList.nextClearBit(i+1);
 		}
-		futures.forEach(f -> {
+		workFutures.forEach(f -> {
 			try {
 				f.get();
 			} catch (Exception e) {

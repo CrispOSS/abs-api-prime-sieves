@@ -64,7 +64,7 @@ public class Sieve implements Actor {
 		return true;
 	}
 
-	public boolean sieve(Integer n) {
+	public Boolean sieve(Integer n) {
 		int first = n * n;
 		int j = 0;
 		if (offset <= first) {
