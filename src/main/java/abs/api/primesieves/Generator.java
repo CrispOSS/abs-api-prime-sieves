@@ -96,7 +96,7 @@ public class Generator extends Sieve {
 		while (i<currentList.size()){
 			
 			int prime = i * 2 + offset;
-			if (prime * prime > target * 2)
+			if (prime * prime - 1 > target * 2)
 				break;
 			for (Actor s : actors) {
 				//this is where the magic happens for the initialization pahse
@@ -106,15 +106,23 @@ public class Generator extends Sieve {
 					workFutures.add(r);
 			}
 			this.sieve(prime);
+			workFutures.forEach(f -> {
+                        try {
+                                f.get();
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                        }
+                });
+			workFutures.clear();
 			i=currentList.nextClearBit(i+1);
 		}
-		workFutures.forEach(f -> {
+/*		workFutures.forEach(f -> {
 			try {
 				f.get();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		});
+		});*/
 	}
 
 	/* (non-Javadoc)
@@ -157,6 +165,6 @@ public class Generator extends Sieve {
 			System.out.println(result);
 		}*/
 		//ng duration = end - start;
-		//stem.out.println("Computation of" + (prime.collect()+1) +" primes ");
+		System.out.println("Computation of" + (prime.collect()+1) +" primes ");
 	}
 }
