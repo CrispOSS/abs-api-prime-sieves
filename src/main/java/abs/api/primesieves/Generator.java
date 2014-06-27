@@ -5,10 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import abs.api.Actor;
+import abs.api.Configuration;
 import abs.api.Context;
+import abs.api.DispatchInbox;
 import abs.api.LocalContext;
 
 // TODO: Auto-generated Javadoc
@@ -34,6 +37,10 @@ public class Generator extends Sieve {
 	private final List<Sieve> sieves = new LinkedList<>();
 	
 	/** The context. Required by the actors to invoke methods. */
+	private static final Configuration config = Configuration
+			.newConfiguration()
+			.withInbox(new DispatchInbox(Executors.newWorkStealingPool()))
+			.build();
 	private final Context context = new LocalContext();
 
 	/**
@@ -96,6 +103,7 @@ public class Generator extends Sieve {
 		while (i<currentList.size()){
 			
 			int prime = i * 2 + offset;
+			
 			if (prime * prime - 1 > target * 2)
 				break;
 			for (Actor s : actors) {
@@ -106,23 +114,23 @@ public class Generator extends Sieve {
 					workFutures.add(r);
 			}
 			this.sieve(prime);
-			workFutures.forEach(f -> {
+			/*workFutures.forEach(f -> {
                         try {
                                 f.get();
                         } catch (Exception e) {
                                 e.printStackTrace();
                         }
                 });
-			workFutures.clear();
+			workFutures.clear();*/
 			i=currentList.nextClearBit(i+1);
 		}
-/*		workFutures.forEach(f -> {
+		workFutures.forEach(f -> {
 			try {
 				f.get();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		});*/
+		});
 	}
 
 	/* (non-Javadoc)
