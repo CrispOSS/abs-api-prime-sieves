@@ -114,23 +114,23 @@ public class Generator extends Sieve {
 					workFutures.add(r);
 			}
 			this.sieve(prime);
-			/*workFutures.forEach(f -> {
+			workFutures.forEach(f -> {
                         try {
                                 f.get();
                         } catch (Exception e) {
                                 e.printStackTrace();
                         }
                 });
-			workFutures.clear();*/
+			workFutures.clear();
 			i=currentList.nextClearBit(i+1);
 		}
-		workFutures.forEach(f -> {
+		/*workFutures.forEach(f -> {
 			try {
 				f.get();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		});
+		});*/
 	}
 
 	/* (non-Javadoc)

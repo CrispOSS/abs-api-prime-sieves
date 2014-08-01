@@ -82,13 +82,15 @@ public class Sieve implements Actor {
 			}
 		}
 		if(j<=last){
-		for(;j<=last;j+=2*n){
-			
+		for(;j>0&(last-j)> (2*n);j+=2*n){
 			currentList.set((j - offset) / 2);	
 			//currentList[(j - offset) / 2] = false;
-			if(j<0||last-j< 2*n)
-				break;
-		}}
+			
+		}
+		}
+		//System.out.println();
+		
+		currentList.set((j - offset) / 2);	
 		return true;
 	}
 
