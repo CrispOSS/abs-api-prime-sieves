@@ -58,7 +58,7 @@ public class Sieve implements Actor {
 	public boolean init(Boolean b){
 		currentList = new BitSet(size);
                 System.out.println(size + " : "+ offset + " "+ last +" "+ currentList.size());
-		/*for (int i = 0; i < size; i++) {
+                /*for (int i = 0; i < size; i++) {
                         currentList[i]=true;
                 }*/
 		return true;

@@ -1,5 +1,6 @@
 package abs.api.primesieves;
 
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +31,7 @@ public class Generator extends Sieve {
 	/** The target. */
 	private int target = 0;
 	
+	//defining all data structure we need for actors.
 	/** The actors. Each actor is a processes whose methods are invoked asynchronously */
 	private final List<Actor> actors = new LinkedList<>();
 	
@@ -37,11 +39,12 @@ public class Generator extends Sieve {
 	private final List<Sieve> sieves = new LinkedList<>();
 	
 	/** The context. Required by the actors to invoke methods. */
+	// copy paste this to use the ABS API into the code(configuration settings)
 	private static final Configuration config = Configuration
 			.newConfiguration()
 			.withInbox(new DispatchInbox(Executors.newWorkStealingPool()))
 			.build();
-	private final Context context = new LocalContext();
+	private final Context context = new LocalContext(config);
 
 	/**
 	 * Instantiates a new generator.
@@ -58,6 +61,9 @@ public class Generator extends Sieve {
 		//System.out.println(par + " limit " + size);
 		for (int i = 1; i < par; ++i) {
 			if (i < modulo) {
+				//defining the object(s) and the actors(as) corresponding to the objects created.
+				//standard template for defining objects is same as java type(object(o).method(m)())
+				//standard template for defining actors is using (context.newActor)
 				Sieve s = new Sieve(3, size + 1, i, modulo);
 				Actor as = context.newActor(s.name().toString(), s); //this is required by invoke
 				actors.add(as);
@@ -79,10 +85,21 @@ public class Generator extends Sieve {
 		//System.out.println(actors.size());
 		//System.out.println(sieves.size());
 		Set<Future<?>> initFutures = new HashSet<>();
+		//logic for broadcasting messages between all actors
 		for (final Actor s : actors) {
 //					s.init(true);
-			//this is where the magic happens for the initialization pahse
+			//this is where the magic happens for the initialization pahse,
+			//composing a message in ABS API format
+			//we compose a runnable message that needs to be created to send by the actor"s" to different
+			//actors defined above in the for loop. once again it is typical java format
+			//object.method() format.
+			//but copy paste context.notary template, this is standard for ABS api to create a message
+			
 			Runnable msg = () -> ((Sieve) context().notary().get(s)).init(new Boolean(true));
+			
+			// we are sending the message"msg"from actor "as" to different actors"s".ayschnoroncly we use
+			//future to save the results processes by the actor and continue the process of remaining actors
+			//without stoping the process.
 			Future<?> r = send(s, msg);
 //            Future<?> r = invoke(s, "init", new Boolean(true)); 
             initFutures.add(r);
@@ -90,7 +107,7 @@ public class Generator extends Sieve {
 		this.init(true);
 //		System.out.println(futures);
 //		System.out.println(actors);
-
+// synchronizing the execution of all processes by the actors so that the program comes to an halt
 		initFutures.forEach(f -> {
                         try {
                                 f.get();
@@ -173,6 +190,6 @@ public class Generator extends Sieve {
 			System.out.println(result);
 		}*/
 		//ng duration = end - start;
-		System.out.println("Computation of" + (prime.collect()+1) +" primes ");
+		System.out.println("Computation of" + (prime.collect()) +" primes ");
 	}
 }
