@@ -81,22 +81,26 @@ public class Sieve implements Actor {
 				}
 			}
 		}
+		
+		//System.out.println(j +" "+(last-j)+ " "+ (2*n));
 		if(j<=last){
-		for(;j>0&(last-j)> (2*n);j+=2*n){
+		for(;j>0&(last-j)>=(2*n);j+=2*n){
+		//	System.out.println((j - offset) / 2);
 			currentList.set((j - offset) / 2);	
 			//currentList[(j - offset) / 2] = false;
 			
 		}
-		}
-		//System.out.println();
-		
+				
 		currentList.set((j - offset) / 2);	
+		}
 		return true;
 	}
 
 	public Integer collect() {
 //		System.out.println(Arrays.asList(currentList));
 		Integer sum = size- currentList.cardinality();
+		//System.out.println(currentList);
+		System.out.println(size+" "+currentList.cardinality()+" "+sum);
 		return sum;
 	}
 

@@ -131,23 +131,24 @@ public class Generator extends Sieve {
 					workFutures.add(r);
 			}
 			this.sieve(prime);
-			workFutures.forEach(f -> {
+			
+/*			workFutures.forEach(f -> {
                         try {
                                 f.get();
                         } catch (Exception e) {
                                 e.printStackTrace();
                         }
                 });
-			workFutures.clear();
+			workFutures.clear();*/
 			i=currentList.nextClearBit(i+1);
 		}
-		/*workFutures.forEach(f -> {
+		workFutures.forEach(f -> {
 			try {
 				f.get();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		});*/
+		});
 	}
 
 	/* (non-Javadoc)
@@ -157,6 +158,8 @@ public class Generator extends Sieve {
 	public Integer collect() {
 //		System.out.println(Arrays.asList(currentList));
 		int sum =size-currentList.cardinality();
+		System.out.println(size+""+""+currentList.cardinality()+sum);
+		//System.out.println(currentList);
 		for (Sieve s : sieves) {
 			 sum+= s.collect();
 		}
@@ -190,6 +193,6 @@ public class Generator extends Sieve {
 			System.out.println(result);
 		}*/
 		//ng duration = end - start;
-		System.out.println("Computation of" + (prime.collect()) +" primes ");
+		System.out.println("Computation of" + (prime.collect()+1) +" primes ");
 	}
 }
